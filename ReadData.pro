@@ -136,31 +136,6 @@ CPUEsd_LMB = InputArray_LMB[4, *]
 FREE_LUN, lun
 
 
-;Return Value 
-;UNIQ returns an array of indices into the original array. Note that the index of the last element in each set of non-unique elements is returned. 
-;If the optional Index argument is supplied, then the last index in the order provided by the Index array is returned.
-
-;The following expression returns a copy of the sorted array with duplicate adjacent elements removed:
-;Array[UNIQ(Array)]
-
-;UNIQ returns 0 (zero) if the argument supplied is a scalar rather than an array.
-
-;Arguments
-;Array
-;The array to be scanned. For UNIQ to work properly, the array must be sorted into monotonic order unless the optional parameter Index is supplied.
-;
-;Index
-;This optional parameter is an array of indices into Array that order the elements into monotonic order. That is, the expression:
-;Array[Index]
-;yields an array in which the elements of Array are rearranged into monotonic order.
-
-;The Index array can be generated from Array using the SORT function:
-;Index = SORT(Array)
-
-;If Array is not already in monotonic order, use the command:
-;UNIQ(Array, SORT(Array))
-
-
 ; Find unique WBIC_year
 UniqWBIC_Year = WBIC_Year[UNIQ(WBIC_Year, SORT(WBIC_Year))]
 PRINT, 'N of unique WBIC_Year', N_ELEMENTS(UniqWBIC_Year)
@@ -356,79 +331,6 @@ paramset = FLTARR(22L, N_ELEMENTS(NumsampleGT30ageclassGT3))
 ;Numageclass = Nageclass[NumsampleGT30ageclassGT3]
 ;PRINT, N_ELEMENTS(Numageclass)
 ;PRINT, (Numageclass)
-
-
-; HOW TO CONSTRAIN PARAMETER VALUES
-;You pass an array of structures through the PARINFO keyword, one structure for each parameter. 
-;The structure describes which parameters should be fixed, and also whether any constraints should be imposed 
-;on the parameter (such as lower or upper bounds). The structures must have a few required fields. 
-;You can do this by replicating a single one like this:
-
-;pi = replicate({fixed:0, limited:[0,0], limits:[0.D,0.D]},4)
-
-;A total of four structures are made because there are four parameters. Once we have the blank template, then 
-;we can fill in any values we desire. For example, we want to fix the first parameter, the constant:
-;
-;pi(0).fixed = 1
-;start(0) = 1000
-;I have reset the starting value to 1000 (the desired value), and "fixed" that parameter by setting it to one. 
-;If fixed is zero for a particular parameter, then it is allowed to vary. Now we run the fit again, but pass pi 
-;to the fitter using the PARINFO keyword:
-;
-;result = MPFITEXPR(expr,     t, r, rerr, start, PARINFO=pi)
-;result = MPFITFUN('MYGAUSS', t, r, rerr, start, PARINFO=pi)
-
-;Specifying Constraining Bounds
-;All of the fitting procedures here also allow you to impose lower and upper bounding constraints on 
-;any combination of the parameters you choose. This might be important, say, if you need to require a 
-;certain parameter to be positive, or be constrained between two fixed values. The technique again uses 
-;the PARINFO keyword. You see above that in addition to the fixed entry, there are some others, including 
-;limited and limits. They work in a similar fashion to fixed.
-
-;For example, let us say we know a priori that the Gaussian mean must be above a value of 2.3. I need to fill 
-;that information into the PARINFO structure like this:
-
-;pi(1).limited(0) = 1
-;pi(1).limits(0) = 2.3
-
-;Here, for parameter number 1, I have set limited(0) equal to 1. The limited entry has two values corresponding to 
-;the lower and upper boundaries, respectively. If limited(0) is set to 1, then the lower boundary is activated. The 
-;boundary itself is found in limits(0), where I entered the value of 2.3. The same logic applies to the upper limits 
-;(which for each parameter are specified in limited(1) and limits(1)). You can have any combination of lower and upper 
-;limits for each parameter. Just make sure that you set both the limited and limits entries: one enables the bound, and 
-;the other gives the actual boundary value.
-
-;Advanced Fitting: Controlling and Limiting the Parameters
-;
-;The mpfit routines allow for some additional control over the fitting. For example, what if you had some information that the amplitude of the gaussian had to be greater than zero? What if you knew that the centroid was precisely 10.2? You want to provide the fitting routine with this information so that it doesn't go off on the wrong path.
-;
-;Control information is passed through the structure variable parinfo, which is easier to learn by example rather than by explanation (there is detailed documentation in the mpfitfun.pro file). Here's an example of parinfo for the situation I just described.
-;
-;parinfo = replicate({value:0.0, fixed:0, limited:[0,0], limits:[0.0,0.0]}, 3)
-;
-;This statement initializes the control array to its defaults; i.e., all parameters vary freely. The last number is the number of parameters in your model; for the gaussian, 3.
-;
-;Now, we want to fix the amplitude to be greater than 0.
-;
-;parinfo[0].limited[0] = 1; parameter 0, the amplitude, has a lower bound
-;parinfo[0].limits[0] = 0.0; do not accept values less than zero
-;
-;Now lets force the centroid to be 10.2.
-;
-;parinfo[1].fixed = 1
-;parinfo[1].value = 10.2
-
-;By the way, it's a good idea not to use startparms if you are going to use parinfo. 
-;Instead, set your initial guesses in parinfo.
-;
-;parinfo[0].value = 1.0
-;parinfo[2].value = 10.0
-;
-;And, of course, we've already set parinfo[1].value when we fixed the centroid.
-;Now, retry the fit and see what happens.
-;
-;startparms[1] = 10.2
-;parms = mpfitfun('jacksgaussian', x, y, dy, perror = dparms, yfit=yfit, parinfo=parinfo)
 
 
 ; Parameterize the VBGF for each WBIC_year

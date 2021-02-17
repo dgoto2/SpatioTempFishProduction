@@ -1,8 +1,6 @@
 FUNCTION AgeLengthKey, p_age0, p_age1, p_age2, p_age3, p_age4, p_age5, p_age6, p_age7, p_age8, p_age9, p_age10 $
 , p_age11, p_age12, p_age13, p_age14, p_age15, p_age16, p_age17, p_age18, p_age19, p_age20, p_age21, p_age22 $
 , p_age23, p_age24, p_age25, p_age26, INDEX_data, LengthIndex
-;
-
 
 FishAgeProb = fltarr(27)
 
